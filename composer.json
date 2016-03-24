@@ -1,0 +1,27 @@
+{
+  "name": "i18n",
+  "type":"library",
+  "repo": "devlucid/i18n",
+  "description": "",
+  "authors": [
+      {
+          "name":     "Mike Thorn",
+          "email":    "mthorn@devlucid.com"
+      }
+  ],
+  "maintainers": [
+      {
+          "name":     "Mike Thorn",
+          "email":    "mthorn@devlucid.com"
+      }
+  ],
+  "autoload": {
+      "psr-4": {"Lucid\\Component\\I18n\\": "/src/php"}
+  },
+  "autoload-dev": {
+      "psr-4": {"Lucid\\Component\\I18n\\": "/src/php"}
+  },
+  "license": "MIT",
+  "bin": [
+  ]
+}
