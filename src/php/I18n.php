@@ -78,6 +78,14 @@ class I18n implements I18nInterface
         }
     }
 
+    public function getPhrases(bool $asString = true)
+    {
+        if ($asString === true) {
+            return print_r($this->phrases, true);
+        }
+        return $this->phrases;
+    }
+
     public function parseLanguageHeader(string $userLang)
     {
         # taken from http://stackoverflow.com/questions/6038236/using-the-php-http-accept-language-server-variable

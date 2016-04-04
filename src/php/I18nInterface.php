@@ -12,4 +12,5 @@ interface I18nInterface
     public function translate(string $phrase, $parameters);
     public function loadDictionaries(string $path);
     public function parseLanguageHeader(string $header);
+    public function getPhrases(bool $asString);
 }
