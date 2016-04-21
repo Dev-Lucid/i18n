@@ -1,8 +1,7 @@
 {
-  "name": "i18n",
+  "name": "devlucid/i18n",
   "type":"library",
-  "repo": "devlucid/i18n",
-  "description": "",
+  "description": "A simple i18n library.",
   "authors": [
       {
           "name":     "Mike Thorn",
@@ -19,7 +18,13 @@
       "psr-4": {"Lucid\\Component\\I18n\\": "/src/php"}
   },
   "autoload-dev": {
-      "psr-4": {"Lucid\\Component\\I18n\\": "/src/php"}
+      "psr-4": {"Lucid\\Component\\I18n\\": "src/php"}
+  },
+  "require":{
+      "php": "^7.0"
+  },
+  "require-dev": {
+      "phpunit/phpunit": "^5.0"
   },
   "license": "MIT",
   "bin": [

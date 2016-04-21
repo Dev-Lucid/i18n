@@ -10,6 +10,7 @@ interface I18nInterface
     public function setLanguage(string $majorLanguage, string $minorLanguage);
     public function addPhrases(array $contents);
     public function translate(string $phrase, $parameters);
+    public function __call(string $phrase, array $parameters);
     public function loadDictionaries(string $path);
     public function parseLanguageHeader(string $header);
     public function getPhrases(bool $asString);
