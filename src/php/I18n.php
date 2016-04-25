@@ -3,45 +3,74 @@ namespace Lucid\Component\I18n;
 
 class I18n implements I18nInterface
 {
-    protected $phrases = [];
-    protected $availableLanguages = [];
-    protected $majorLanguage = null;
-    protected $minorLanguage = null;
+    protected $config = [];
+
+    public function __construct($config = null)
+    {
+        if (is_null($config) === false) {
+            $invalidConfigMessage = 'If you pass parameter $config, it must either be an array, or an object that implements ArrayAccess and Iterator.';
+            if (is_array($config) === true) {
+                $this->config =& $config;
+            } elseif(is_object($config) === true) {
+                $class_implements($config);
+                if (in_array('ArrayAccess', $class_implements) === true && in_array('Iterator', $class_implements) === true) {
+                    $this->config = $config;
+                } else {
+                    throw new \Exception($invalidConfigMessage);
+                }
+            } else {
+                throw new \Exception($invalidConfigMessage);
+            }
+        }
+
+        if (isset($this->config['phrases']) === false || is_array($this->config['phrases']) === false) {
+            $this->config['phrases'] = [];
+        }
+        if (isset($this->config['availableLanguages']) === false || is_array($this->config['availableLanguages']) === false) {
+            $this->config['availableLanguages'] = [];
+        }
+        if (isset($this->config['majorLanguage']) === false) {
+            $this->config['majorLanguage'] = null;
+        }
+        if (isset($this->config['minorLanguage']) === false) {
+            $this->config['minorLanguage'] = null;
+        }
+    }
 
     # this function exists only for testing purposes
     public function resetLanguage()
     {
-        $this->majorLanguage = null;
-        $this->minorLanguage = null;
+        $this->config['majorLanguage'] = null;
+        $this->config['minorLanguage'] = null;
     }
 
     public function addAvailableLanguage(string $code, array $variants=[])
     {
-        $this->availableLanguages[$code] = $variants;
+        $this->config['availableLanguages'][$code] = $variants;
         return $this;
     }
 
     public function getAvailableLanguages() : array
     {
-        return $this->availableLanguages;
+        return $this->config['availableLanguages'];
     }
 
     public function getMajorLanguage()
     {
-        return $this->majorLanguage;
+        return $this->config['majorLanguage'];
     }
 
     public function getMinorLanguage()
     {
-        return $this->minorLanguage;
+        return $this->config['minorLanguage'];
     }
 
     public function setLanguage(string $majorLanguage, string $minorLanguage=null)
     {
-        if (array_key_exists($majorLanguage, $this->availableLanguages)) {
-            $this->majorLanguage = $majorLanguage;
-            if (array_key_exists($minorLanguage, $this->availableLanguages[$majorLanguage])) {
-                $this->minorLanguage = $minorLanguage;
+        if (isset($this->config['availableLanguages'][$majorLanguage])) {
+            $this->config['majorLanguage'] = $majorLanguage;
+            if (in_array($minorLanguage, $this->config['availableLanguages'][$majorLanguage])) {
+                $this->config['minorLanguage'] = $minorLanguage;
             }
         }
         return $this;
@@ -50,16 +79,16 @@ class I18n implements I18nInterface
     public function addPhrases(array $newPhrases)
     {
         foreach ($newPhrases as $key=>$value) {
-            $this->phrases[$key] = $value;
+            $this->config['phrases'][$key] = $value;
         }
     }
 
     public function translate(string $phrase, $parameters=[]): string
     {
-        if (isset($this->phrases[$phrase]) === false) {
+        if (isset($this->config['phrases'][$phrase]) === false) {
             return $phrase;
         }
-        $phrase = $this->phrases[$phrase];
+        $phrase = $this->config['phrases'][$phrase];
         foreach ($parameters as $key=>$value) {
             $phrase = str_replace(':'.$key, $value, $phrase);
         }
@@ -73,12 +102,12 @@ class I18n implements I18nInterface
 
     public function loadDictionaries(string $path)
     {
-        $this->phrases  = [];
+        $this->config['phrases']  = [];
         $langMajorFiles = [];
         $langMinorFiles = [];
 
-        $langMajorFiles = glob($path.'/'.$this->majorLanguage.'[._]*json');
-        $langMinorFiles = glob($path.'/'.$this->majorLanguage.$this->minorLanguage.'*json');
+        $langMajorFiles = glob($path.'/'.$this->config['majorLanguage'].'[._]*json');
+        $langMinorFiles = glob($path.'/'.$this->config['majorLanguage'].$this->config['minorLanguage'].'*json');
 
         foreach ($langMajorFiles as $file) {
             $contents = json_decode(file_get_contents($file), true);
@@ -94,9 +123,9 @@ class I18n implements I18nInterface
     public function getPhrases(bool $asString = true)
     {
         if ($asString === true) {
-            return print_r($this->phrases, true);
+            return print_r($this->config['phrases'], true);
         }
-        return $this->phrases;
+        return $this->config['phrases'];
     }
 
     public function parseLanguageHeader(string $userLang)
@@ -115,16 +144,16 @@ class I18n implements I18nInterface
 
             # only bother looking if we don't have a major language at all,
             # or if this entry contains a variant of the same language as the current major language
-            if (is_null($this->majorLanguage) || (is_null($this->minorLanguage) && $this->majorLanguage == $major))  {
+            if (is_null($this->config['majorLanguage']) || (is_null($this->config['minorLanguage']) && $this->config['majorLanguage'] == $major))  {
 
                 # if we haven't found a major language yet and this major language is available, use it.
-                if (is_null($this->majorLanguage) === true && isset($this->availableLanguages[$major]) === true) {
-                    $this->majorLanguage = $major;
-                    $this->minorLanguage = $minor;
+                if (is_null($this->config['majorLanguage']) === true && isset($this->config['availableLanguages'][$major]) === true) {
+                    $this->config['majorLanguage'] = $major;
+                    $this->config['minorLanguage'] = $minor;
                 }
 
-                if (is_null($this->minorLanguage) === true && in_array($minor, $this->availableLanguages[$major] ?? []) === true) {
-                    $this->minorLanguage = $minor;
+                if (is_null($this->config['minorLanguage']) === true && in_array($minor, $this->config['availableLanguages'][$major] ?? []) === true) {
+                    $this->config['minorLanguage'] = $minor;
                 }
             }
             /*
@@ -169,7 +198,7 @@ class I18n implements I18nInterface
             $major = array_shift($code);
             $minor = (count($code) > 0)?array_shift($code):null;
 
-            if (in_array($major, array_keys($this->availableLanguages)) === true || (isset($this->availableLanguages[$major]) && in_array($minor, array_keys($this->availableLanguages[$major]) === true))) {
+            if (in_array($major, array_keys($this->config['availableLanguages'])) === true || (isset($this->config['availableLanguages'][$major]) && in_array($minor, array_keys($this->config['availableLanguages'][$major]) === true))) {
                 if ($major == $bestMajor and is_null($minor) === true) {
                     # do nothing! We don't want to overwrite an existing minor language setting if we've already got the
                     # right major language

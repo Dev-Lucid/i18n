@@ -3,6 +3,7 @@ namespace Lucid\Component\I18n;
 
 interface I18nInterface
 {
+    public function __construct($config = null);
     public function addAvailableLanguage(string $code, array $variants=[]);
     public function getAvailableLanguages();
     public function getMajorLanguage();
